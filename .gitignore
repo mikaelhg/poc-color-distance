@@ -1,0 +1,6 @@
+/venv/
+*.pyc
+/.idea/
+/*.iml
+/static/gen/
+/static/.webassets-cache/
