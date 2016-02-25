@@ -26,14 +26,10 @@ def rgb_to_web(r, g, b):
 @app.route('/')
 def distance_from_orange():
     colors = model.colors()
-    ret = {}
 
-    out = ''
-
-    out += '<table style="border-collapse: collapse;">'
+    out = '<table style="border-collapse: collapse;">'
 
     for vid, clist in colors:
-        ret[vid] = []
         rgbs = [uint24_to_rgb(int(x)) for x in clist.split(',')]
 
         for c in rgbs:
@@ -51,8 +47,9 @@ def distance_from_orange():
                     <td width="100" align="center">{0:d}</td>
                     <td width="100" height="100" align="center" style="background: {1}">{1}</td>
                     <td width="100" align="center" style="font-size: 5em">{2}</td>
+                    <td width="100" align="center">{3}</td>
                 </tr>
-            """.format(vid, color_hex, match)
+            """.format(vid, color_hex, match, int(delta))
 
     out += '</table>'
 
