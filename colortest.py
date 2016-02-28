@@ -12,7 +12,7 @@ app = Flask(__name__)
 
 ORANGE = (255, 165, 0)
 
-CLOSE_ENOUGH = 30.0
+CLOSE_ENOUGH = 25.0
 
 
 def uint24_to_rgb(uint):
@@ -23,19 +23,24 @@ def rgb_to_web(r, g, b):
     return '#%02x%02x%02x' % (r, g, b)
 
 
+# Turns out, if you optimize the Kl constant in CIE 2000 according to the paper
+# "Performance testing of CIEDE2000 color-difference formula using CRT colors"
+# you can get much better performance for the red colour, which helps us here.
+
 def calc_delta(rgb1=(0, 0, 0), rgb2=(0, 0, 0), algo=delta_e_cie2000):
-    lab1 = convert_color(sRGBColor(*rgb1, is_upscaled=True), LabColor)
-    lab2 = convert_color(sRGBColor(*rgb2, is_upscaled=True), LabColor)
-    return algo(lab1, lab2)
+    lab1 = convert_color(AdobeRGBColor(*rgb1, is_upscaled=True), LabColor)
+    lab2 = convert_color(AdobeRGBColor(*rgb2, is_upscaled=True), LabColor)
+    if algo == delta_e_cie2000:
+        return algo(lab1, lab2, Kl=0.63)
+    else:
+        return algo(lab1, lab2)
 
 
 @app.route('/')
 def distance_from_orange():
     colors = model.colors()
 
-    out = '<table style="border-collapse: collapse;">'
-
-    out += """
+    out = """<table style="border-collapse: collapse;">
             <tr style="border: solid 1px;">
                 <td width="100" align="center">{0}</td>
                 <td width="100" height="100" align="center" style="background: {1}">{1}</td>
@@ -54,6 +59,8 @@ def distance_from_orange():
 
             if delta < CLOSE_ENOUGH:
                 match = '&#11013;'
+            elif delta > 60:
+                continue
             else:
                 match = ''
 
