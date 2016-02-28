@@ -11,6 +11,7 @@ SELECT_GOOD = """
 SELECT id, colorlist
   FROM visitors
  WHERE colorlist IS NOT NULL
+   AND LENGTH(colorlist) > 0
 """[1:-1]
 
 
